@@ -23,6 +23,7 @@ var rectTwoY = 30;
 var recOneWins = 0; 
 var recTwoWins = 0;
 
+
 //where we get the keypress 
 document.onkeydown = function (event) {
 	if(event.keyCode == '83') {

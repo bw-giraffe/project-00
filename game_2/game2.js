@@ -1,7 +1,5 @@
 
 $(document).ready(function(){
-	console.log("the document is ready!");
-})
 
 var canvas_width = 300;
 var canvas_height = 480;
@@ -12,12 +10,20 @@ var canvasElement = $("<canvas width='" + canvas_width +
 var canvas = canvasElement.get(0).getContext("2d");
 canvasElement.appendTo('.mycanvas');
 
+var background = new Image();
+background.src = "/Users/RR/dev/project-00/game_2/img/atmosphere.jpg"
+
 var rand1;
 var rand2;
 var userAnswer;
 
+var playerOne = true; 
+
 var p1Y = 440;
 var p2Y = 440;
+
+var p1Score = 0;
+var p2Score = 0;
 
 function getRandomNums() {
 	rand1 = Math.round(Math.random() * 8 + 1);
@@ -32,23 +38,32 @@ function solveNums(rand1, rand2) {
 function checkUserAnswer(answer, userAnswer) {
 	var parsedInt = parseInt(userAnswer);
 	if(answer === parsedInt) {
-		p1Y--;
-		p2Y--;
 		console.log("correct");
-		//switch over to other char 
-		//reset the math
-		newEquation();
+		if(playerOne) {
+			p1Y-=25;
+			p1Score+=10;
+		} else {
+			p2Y-=25;
+			p2Score+=10;
+		}
 	} else {
-		p1Y++;
-		p1Y++;
 		console.log("incorrect");
-		//switch to other char 
-		//reset the math
-		newEquation();
+		if(playerOne) {
+			p1Y+=10;
+			p2Score-=5;
+		} else {
+			p2Y+=10;
+			p2Score-=5;
+		}
 	}
+	winConditions();
+	newEquation();
+	$('p#currentP').text(delegateTurn());
+	displayScore();
 }
 
 function newEquation() {
+	$('input').val('');
 	getRandomNums();
 	$('.numdisplay').text(rand1 + "     +     " + rand2 + " = ");
 	var solution = solveNums(rand1, rand2);
@@ -60,7 +75,6 @@ function newEquation() {
 	}
 }
 
-newEquation();
 
 function characterOne() {
 	
@@ -78,9 +92,49 @@ function characterTwo() {
 	canvas.fill();
 }
 
-function whoseTurn() {
-	if()
+function delegateTurn() {
+	if(playerOne) {
+		playerOne = false;
+		return "Go player 2!"
+	} else {
+		playerOne = true;
+		return "Go player 1!"
+	}
 }
+
+function displayScore() {
+	$('p#scorekeeper').text("Player one: " + p1Score + " | Player two: " + p2Score);	
+}
+
+function winConditions() {
+	if(p1Y < 10 || p2Y < 10) {
+		if(p1Y < 10) {
+			$('p#winner').text("The winner is player one!");
+		} else {
+			$('p#winner').text("The winner is player two!");
+		}
+		var response = prompt("You successfully made it through the atmosphere! Play again?")
+			if(response === "yes" || "YES") {
+				reset();
+			}
+	}
+}
+
+function reset() {
+	p1Y = 440;
+	p2Y = 440; 
+	p1Score = 0;
+	p2Score = 0;
+	$('p#winner').text("");
+	$('p#currentP').text("");
+	playerOne = true;
+}
+
+newEquation();
+
+$('button.reset').on("click", function (event) {
+	reset();
+})
 
 
 var FPS = 30;
@@ -90,8 +144,15 @@ setInterval(function() {
 	//update();
 }, 1000/FPS);
 
+
 function draw() {
 	canvas.clearRect(0, 0, canvas_width, canvas_height);
+	canvas.drawImage(background, 0, 0)
 	characterOne();
 	characterTwo();
+
 }
+
+	console.log("the document is ready!");
+})
+
